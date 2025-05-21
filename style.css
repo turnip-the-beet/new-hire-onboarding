@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+#game-container {
+    display: flex;
+    border: 2px solid #34495e;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+}
+
+#gameCanvas {
+    /* This will be drawn by JS, so no CSS background needed */
+    display: block;
+}
+
+#info-panel {
+    width: 250px;
+    padding: 20px;
+    background-color: #ecf0f1;
+    border-left: 1px solid #bdc3c7;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#info-panel h2 {
+    color: #2980b9;
+    margin-top: 0;
+    border-bottom: 1px solid #bdc3c7;
+    padding-bottom: 10px;
+}
+
+#objective-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    flex-grow: 1;
+}
+
+#objective-list li {
+    padding: 8px 0;
+    color: #34495e;
+}
+
+#objective-list li.completed {
+    text-decoration: line-through;
+    color: #7f8c8d;
+}
+
+#game-message {
+    background-color: #e0f2f7;
+    padding: 10px;
+    border-radius: 5px;
+    color: #2c3e50;
+    font-weight: bold;
+    text-align: center;
+}
+
+#resetButton {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 15px;
+    width: 100%;
+}
+
+#resetButton:hover {
+    background-color: #c0392b;
+}
