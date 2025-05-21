@@ -19,7 +19,7 @@ const DEADZONE_X_PX = canvas.width / 4; // Example: Player moves within the cent
 const DEADZONE_Y_PX = canvas.height / 4; // Example: Player moves within the central 50% vertically
 
 // --- Message Timer Constants & Variable ---
-const IDLE_MESSAGE_DELAY = 3000; // Time in milliseconds before reverting to idle message (e.g., 3 seconds)
+const IDLE_MESSAGE_DELAY = 500; // Time in milliseconds before reverting to idle message (e.g., 3 seconds)
 const IDLE_MESSAGE = "Explore the map to find your tasks!"; // The message when player is idle
 let messageTimerId = null; // Variable to hold the timer ID, so we can cancel it
 
