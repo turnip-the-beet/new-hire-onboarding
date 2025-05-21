@@ -2,6 +2,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Console logs for initial setup confirmation
 console.log("Canvas initialized. Width:", canvas.width, "Height:", canvas.height);
 console.log("2D drawing context obtained:", ctx);
 
@@ -25,32 +26,48 @@ const player = {
 };
 
 // Map definition (0: path, 1: wall, 2: interaction point)
+// **** NEW: Much larger map to allow for scrolling (40x40 tiles) ****
 const gameMap = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1], // Task 1 (Chest)
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,2,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Task 1
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
 
 // Define objectives with their grid coordinates and the URL to open
@@ -60,32 +77,37 @@ const objectives = [
         description: 'Sign your Onboarding Documents',
         completed: false,
         triggerTile: { x: 6, y: 5 }, // Corresponds to the '2' in gameMap
-        link: 'https://example.com/onboarding-documents' // REPLACE with your actual document link
+        link: 'https://example.com/onboarding-documents'
     },
     {
         id: 'training_video_1',
         description: 'Watch the Welcome Training Video',
         completed: false,
-        triggerTile: { x: 15, y: 10 }, // Example new task location
-        link: 'https://example.com/welcome-video' // REPLACE with your actual video link
+        triggerTile: { x: 15, y: 10 },
+        link: 'https://example.com/welcome-video'
+    },
+    {
+        id: 'new_task_3', // Added a new task for the larger map
+        description: 'Complete the Security Training',
+        completed: false,
+        triggerTile: { x: 30, y: 20 },
+        link: 'https://example.com/security-training'
     }
-    // Add more objectives here
 ];
 
 let currentMessage = '';
-let gameStarted = false; // To prevent interaction before loading
+let gameStarted = false;
 
 
-// --- ALL FUNCTION DEFINITIONS GO HERE (BEFORE THEY ARE CALLED) ---
+// --- ALL FUNCTION DEFINITIONS ---
 
-// Image loading function
 function loadImage(name, src) {
     const img = new Image();
     img.onload = () => {
         imagesLoadedCount++;
         if (imagesLoadedCount === totalImages) {
-            console.log('All required images loaded! Calling loadGame().'); // Added log
-            loadGame(); // THIS WILL NOW BE DEFINED
+            console.log('All required images loaded! Calling loadGame().');
+            loadGame();
         }
     };
     img.onerror = () => {
@@ -95,13 +117,24 @@ function loadImage(name, src) {
     images[name] = img;
 }
 
-// Drawing functions
 function drawMap() {
-    console.log(`Player pos: (${player.x}, ${player.y})`);
-    // ... camera calculations ...
-    console.log(`Camera pos: (${cameraX.toFixed(2)}, ${cameraY.toFixed(2)})`);
+    let cameraX = player.x * TILE_SIZE - canvas.width / 2 + PLAYER_SIZE / 2;
+    let cameraY = player.y * TILE_SIZE - canvas.height / 2 + PLAYER_SIZE / 2;
 
-    // ... startTileX, endTileX, etc. calculations ...
+    const maxCameraX = gameMap[0].length * TILE_SIZE - canvas.width;
+    const maxCameraY = gameMap.length * TILE_SIZE - canvas.height;
+
+    cameraX = Math.max(0, Math.min(cameraX, maxCameraX));
+    cameraY = Math.max(0, Math.min(cameraY, maxCameraY));
+
+    // Console logs for camera debugging (remove when satisfied)
+    // console.log(`Player pos: (${player.x}, ${player.y})`);
+    // console.log(`Camera pos: (${cameraX.toFixed(2)}, ${cameraY.toFixed(2)})`);
+
+    const startTileX = Math.floor(cameraX / TILE_SIZE);
+    const endTileX = Math.ceil((cameraX + canvas.width) / TILE_SIZE);
+    const startTileY = Math.floor(cameraY / TILE_SIZE);
+    const endTileY = Math.ceil((cameraY + canvas.height) / TILE_SIZE);
 
     for (let y = startTileY; y < endTileY; y++) {
         for (let x = startTileX; x < endTileX; x++) {
@@ -109,7 +142,6 @@ function drawMap() {
                 const tileType = gameMap[y][x];
                 let tileImage;
 
-                // ... (your existing if/else if for tileType 1, 2, 0) ...
                 if (tileType === 1) {
                     tileImage = images.wall;
                 } else if (tileType === 2) {
@@ -118,9 +150,10 @@ function drawMap() {
                     tileImage = images.floor;
                 }
 
-                if (tileImage === images.player) { // **** ADD THIS CHECK ****
-                    console.warn(`WARNING: Tile at (<span class="math-inline">\{x\},</span>{y}) is drawing the Player image! This tile should be a map tile.`);
-                }
+                // Debug: Check if any map tile is trying to draw the Player image
+                // if (tileImage === images.player) {
+                //     console.warn(`WARNING: Tile at (${x},${y}) is drawing the Player image! This tile should be a map tile.`);
+                // }
 
                 if (tileImage && tileImage.complete) {
                     ctx.drawImage(tileImage,
@@ -128,13 +161,12 @@ function drawMap() {
                                   y * TILE_SIZE - cameraY,
                                   TILE_SIZE, TILE_SIZE);
                 } else {
-                    // Fallback: draw a colored square if image not loaded
                     let color = 'pink';
                     if (tileType === 0) color = 'lightgray';
                     else if (tileType === 1) color = 'darkgray';
                     else if (tileType === 2) color = 'gold';
                     ctx.fillStyle = color;
-                    ctx.fillRect(x * TILE_SIZE - cameraX, y * TILE_SIZE - cameraY, TILE_SIZE, TILE_SIZE);
+                    ctx.fillRect(x * TILE_SIZE - cameraX, y * Tile_SIZE - cameraY, TILE_SIZE, TILE_SIZE);
                 }
             }
         }
@@ -142,28 +174,34 @@ function drawMap() {
 }
 
 function drawPlayer() {
-    const playerDrawX = (canvas.width / 2); // Center X of canvas
-    const playerDrawY = (canvas.height / 2); // Center Y of canvas
+    const playerDrawX = (canvas.width / 2) - (PLAYER_SIZE / 2);
+    const playerDrawY = (canvas.height / 2) - (PLAYER_SIZE / 2);
 
-    ctx.fillStyle = 'lime'; // A very bright, unmistakable color
-    ctx.beginPath(); // Start drawing a shape
-    ctx.arc(playerDrawX, playerDrawY, PLAYER_SIZE / 2, 0, Math.PI * 2); // Draw a circle
-    ctx.fill(); // Fill the circle with lime
-    ctx.closePath(); // End drawing the shape
+    // This is the actual player being drawn in the center of the screen
+    if (images.player && images.player.complete) {
+        ctx.drawImage(images.player, playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
+    } else {
+        ctx.fillStyle = 'red'; // Fallback to red square if player image not loaded
+        ctx.fillRect(playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
+    }
 
-    // Optional: Draw a border around the circle for more visibility
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // Debug: Draw a distinct shape for the player if there's still confusion (optional)
+    // ctx.fillStyle = 'lime'; // A very bright, unmistakable color
+    // ctx.beginPath();
+    // ctx.arc(playerDrawX + PLAYER_SIZE / 2, playerDrawY + PLAYER_SIZE / 2, PLAYER_SIZE / 2, 0, Math.PI * 2);
+    // ctx.fill();
+    // ctx.closePath();
+    // ctx.strokeStyle = 'black';
+    // ctx.lineWidth = 2;
+    // ctx.stroke();
 }
-// Main game drawing loop
+
 function drawGame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawMap();
     drawPlayer();
 }
 
-// Game logic functions
 function isColliding(targetX, targetY) {
     if (targetX < 0 || targetX >= gameMap[0].length ||
         targetY < 0 || targetY >= gameMap.length) {
@@ -242,23 +280,16 @@ function loadGame() {
     }
     gameStarted = true;
     updateObjectivesPanel();
-    drawGame(); // Initial draw after loading
+    drawGame();
 }
 
 
-// --- Event Listeners (Must be after functions they call) ---
-
-// --- Event Listeners (Must be after functions they call) ---
-console.log("Attempting to add keydown listener..."); // **** ADD THIS LINE ****
+// --- Event Listeners ---
 
 document.addEventListener('keydown', (e) => {
-    // ... (rest of your keydown event listener code)
-});
-
-document.addEventListener('keydown', (e) => {
-    console.log("Key pressed:", e.key); // Log every key press
+    // console.log("Key pressed:", e.key); // Removed for cleaner console
     if (!gameStarted) {
-        console.log("Game not started yet, ignoring key press.");
+        // console.log("Game not started yet, ignoring key press."); // Removed for cleaner console
         return;
     }
 
@@ -268,42 +299,50 @@ document.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'ArrowUp':
             newY--;
+            e.preventDefault();
             break;
         case 'ArrowDown':
             newY++;
+            e.preventDefault();
             break;
         case 'ArrowLeft':
             newX--;
+            e.preventDefault();
             break;
         case 'ArrowRight':
             newX++;
+            e.preventDefault();
             break;
-        default: // If other keys are pressed
-            console.log("Non-arrow key pressed, ignoring.");
+        default:
+            // console.log("Non-arrow key pressed, ignoring."); // Removed for cleaner console
             return;
     }
 
-    console.log("Attempting to move from (" + player.x + "," + player.y + ") to (" + newX + "," + newY + ")"); // Log attempted move
+    // console.log("Attempting to move from (" + player.x + "," + player.y + ") to (" + newX + "," + newY + ")"); // Removed for cleaner console
 
     if (!isColliding(newX, newY)) {
-        player.x = newX; // Update player's data position
-        player.y = newY; // Update player's data position
+        player.x = newX;
+        player.y = newY;
         updateMessage('Moving...');
-        console.log("Player successfully moved to (" + player.x + "," + player.y + ")."); // Confirm data update
-        drawGame(); // THIS SHOULD REDRAW THE GAME
-        console.log("drawGame() called after move."); // Confirm drawGame was reached
+        // console.log("Player successfully moved to (" + player.x + "," + player.y + ")."); // Removed for cleaner console
+        drawGame();
+        // console.log("drawGame() called after move."); // Removed for cleaner console
         checkInteraction();
     } else {
         updateMessage("Can't go that way! It's a wall.");
-        console.log("Collision detected. Player did NOT move."); // Confirm collision detection
+        // console.log("Collision detected. Player did NOT move."); // Removed for cleaner console
     }
 });
 
-// --- Initial Calls to Start the Game (Must be after everything is defined) ---
+resetButton.addEventListener('click', () => {
+    if (confirm('Are you sure you want to reset all game progress?')) {
+        localStorage.removeItem('onboardingGameSave');
+        location.reload();
+    }
+});
 
-// This function call starts the image loading process.
-// Once all images are loaded (via their onload callbacks), loadGame() will be called,
-// which then initiates the first draw of the game.
+
+// --- Initial Calls to Start the Game ---
 loadImage('floor', 'dungeon_floor_tile.png');
 loadImage('wall', 'fences.png');
 loadImage('player', 'Player.png');
