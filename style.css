@@ -1,47 +1,74 @@
+/* General Body Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Clean, modern font */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+    min-height: 100vh; /* Full viewport height */
     margin: 0;
-    background-color: #f0f0f0;
-    color: #333;
+    padding: 20px; /* Some padding around the content */
+    box-sizing: border-box; /* Include padding in element's total width and height */
+
+    /* xiliotx.com inspired dark gradient background */
+    background: linear-gradient(135deg, #0a0a1a 0%, #000000 100%);
+    color: #e0e0f0; /* Light text color for dark background */
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
+/* Page Title */
 h1 {
-    color: #2c3e50;
-    margin-bottom: 20px;
+    color: #00e0ff; /* Bright blue accent, reminiscent of neon */
+    font-size: 2.8em;
+    text-shadow: 0 0 10px rgba(0, 224, 255, 0.6); /* Subtle glow effect */
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
+/* Game Container - The centerpiece */
 #game-container {
     display: flex;
-    border: 2px solid #34495e;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    background-color: #fff;
+    border: 1px solid #1a1a33; /* Dark border */
+    box-shadow: 0 0 30px rgba(0, 224, 255, 0.4), /* Outer glow */
+                0 0 15px rgba(0, 224, 255, 0.8), /* Inner glow */
+                inset 0 0 8px rgba(0, 224, 255, 0.2); /* Inner subtle glow */
+    background-color: #1a1a2e; /* Slightly lighter dark background for the box */
+    border-radius: 8px; /* Slightly rounded corners */
+    overflow: hidden; /* Ensures canvas doesn't bleed out */
+    transition: all 0.3s ease-in-out; /* Smooth transition for hover effects */
 }
 
+#game-container:hover {
+    box-shadow: 0 0 40px rgba(0, 224, 255, 0.6),
+                0 0 20px rgba(0, 224, 255, 1),
+                inset 0 0 10px rgba(0, 224, 255, 0.3);
+}
+
+/* Game Canvas - The actual game display */
 #gameCanvas {
-    /* This will be drawn by JS, so no CSS background needed */
     display: block;
+    /* Background for canvas is handled by JS drawing */
 }
 
+/* Info Panel - Sidebar next to the game */
 #info-panel {
-    width: 250px;
-    padding: 20px;
-    background-color: #ecf0f1;
-    border-left: 1px solid #bdc3c7;
+    width: 280px; /* Slightly wider panel */
+    padding: 25px;
+    background-color: #1a1a2e; /* Same as container background */
+    border-left: 1px solid #00e0ff; /* Accent border on the left */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    box-shadow: inset 2px 0 8px rgba(0, 224, 255, 0.2); /* Inner shadow for panel */
 }
 
 #info-panel h2 {
-    color: #2980b9;
+    color: #00e0ff; /* Bright blue accent */
     margin-top: 0;
-    border-bottom: 1px solid #bdc3c7;
-    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 224, 255, 0.3); /* Subtle accent border */
+    padding-bottom: 12px;
+    font-size: 1.6em;
+    letter-spacing: 1px;
 }
 
 #objective-list {
@@ -49,39 +76,53 @@ h1 {
     padding: 0;
     margin: 15px 0;
     flex-grow: 1;
+    font-size: 0.95em;
 }
 
 #objective-list li {
-    padding: 8px 0;
-    color: #34495e;
+    padding: 10px 0;
+    color: #b0e0ff; /* Lighter blue for text */
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08); /* Very subtle separator */
+}
+
+#objective-list li:last-child {
+    border-bottom: none; /* No border for the last item */
 }
 
 #objective-list li.completed {
     text-decoration: line-through;
-    color: #7f8c8d;
+    color: #7f8c8d; /* Muted color for completed tasks */
 }
 
 #game-message {
-    background-color: #e0f2f7;
-    padding: 10px;
-    border-radius: 5px;
-    color: #2c3e50;
+    background-color: rgba(0, 224, 255, 0.1); /* Subtle glowing background */
+    border: 1px solid rgba(0, 224, 255, 0.3);
+    padding: 12px;
+    border-radius: 6px;
+    color: #e0f2f7;
     font-weight: bold;
     text-align: center;
+    font-size: 1.1em;
+    box-shadow: 0 0 8px rgba(0, 224, 255, 0.3); /* Message glow */
 }
 
+/* Reset Button */
 #resetButton {
-    background-color: #e74c3c;
+    background-color: #e74c3c; /* Still a distinct warning color */
     color: white;
-    padding: 10px 15px;
+    padding: 12px 18px;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 1em;
-    margin-top: 15px;
+    font-size: 1.05em;
+    margin-top: 20px;
     width: 100%;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 #resetButton:hover {
     background-color: #c0392b;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.6); /* Red glow on hover */
 }
