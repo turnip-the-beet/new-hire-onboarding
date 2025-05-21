@@ -2,7 +2,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Console logs for initial setup confirmation
 console.log("Canvas initialized. Width:", canvas.width, "Height:", canvas.height);
 console.log("2D drawing context obtained:", ctx);
 
@@ -21,12 +20,12 @@ const totalImages = 4; // Expecting all 4 images to be uploaded and loading corr
 
 // --- Game state Variables ---
 const player = {
-    x: 1, // Player's current x position on the MAP grid (grid coordinates)
-    y: 1, // Player's current y position on the MAP grid (grid coordinates)
+    x: 2, // **** NEW: Player's starting X position (moved from 1 to 2) ****
+    y: 2, // **** NEW: Player's starting Y position (moved from 1 to 2) ****
 };
 
 // Map definition (0: path, 1: wall, 2: interaction point)
-// **** NEW: Much larger map to allow for scrolling (40x40 tiles) ****
+// Using the larger map (40x40 tiles) to give plenty of room to walk
 const gameMap = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -76,7 +75,7 @@ const objectives = [
         id: 'doc_signing',
         description: 'Sign your Onboarding Documents',
         completed: false,
-        triggerTile: { x: 6, y: 5 }, // Corresponds to the '2' in gameMap
+        triggerTile: { x: 6, y: 5 },
         link: 'https://example.com/onboarding-documents'
     },
     {
@@ -87,7 +86,7 @@ const objectives = [
         link: 'https://example.com/welcome-video'
     },
     {
-        id: 'new_task_3', // Added a new task for the larger map
+        id: 'new_task_3',
         description: 'Complete the Security Training',
         completed: false,
         triggerTile: { x: 30, y: 20 },
@@ -117,83 +116,48 @@ function loadImage(name, src) {
     images[name] = img;
 }
 
+// **** NEW: drawMap() - NO CAMERA LOGIC ****
 function drawMap() {
-    let cameraX = player.x * TILE_SIZE - canvas.width / 2 + PLAYER_SIZE / 2;
-    let cameraY = player.y * TILE_SIZE - canvas.height / 2 + PLAYER_SIZE / 2;
+    for (let y = 0; y < gameMap.length; y++) {
+        for (let x = 0; x < gameMap[y].length; x++) {
+            const tileType = gameMap[y][x];
+            let tileImage;
 
-    const maxCameraX = gameMap[0].length * TILE_SIZE - canvas.width;
-    const maxCameraY = gameMap.length * TILE_SIZE - canvas.height;
+            if (tileType === 1) {
+                tileImage = images.wall;
+            } else if (tileType === 2) {
+                tileImage = images.task_icon;
+            } else {
+                tileImage = images.floor;
+            }
 
-    cameraX = Math.max(0, Math.min(cameraX, maxCameraX));
-    cameraY = Math.max(0, Math.min(cameraY, maxCameraY));
-
-    // Console logs for camera debugging (remove when satisfied)
-    // console.log(`Player pos: (${player.x}, ${player.y})`);
-    // console.log(`Camera pos: (${cameraX.toFixed(2)}, ${cameraY.toFixed(2)})`);
-
-    const startTileX = Math.floor(cameraX / TILE_SIZE);
-    const endTileX = Math.ceil((cameraX + canvas.width) / TILE_SIZE);
-    const startTileY = Math.floor(cameraY / TILE_SIZE);
-    const endTileY = Math.ceil((cameraY + canvas.height) / TILE_SIZE);
-
-    for (let y = startTileY; y < endTileY; y++) {
-        for (let x = startTileX; x < endTileX; x++) {
-            if (y >= 0 && y < gameMap.length && x >= 0 && x < gameMap[0].length) {
-                const tileType = gameMap[y][x];
-                let tileImage;
-
-                if (tileType === 1) {
-                    tileImage = images.wall;
-                } else if (tileType === 2) {
-                    tileImage = images.task_icon;
-                } else {
-                    tileImage = images.floor;
-                }
-
-                // Debug: Check if any map tile is trying to draw the Player image
-                // if (tileImage === images.player) {
-                //     console.warn(`WARNING: Tile at (${x},${y}) is drawing the Player image! This tile should be a map tile.`);
-                // }
-
-                if (tileImage && tileImage.complete) {
-                    ctx.drawImage(tileImage,
-                                  x * TILE_SIZE - cameraX,
-                                  y * TILE_SIZE - cameraY,
-                                  TILE_SIZE, TILE_SIZE);
-                } else {
-                    let color = 'pink';
-                    if (tileType === 0) color = 'lightgray';
-                    else if (tileType === 1) color = 'darkgray';
-                    else if (tileType === 2) color = 'gold';
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x * TILE_SIZE - cameraX, y * Tile_SIZE - cameraY, TILE_SIZE, TILE_SIZE);
-                }
+            if (tileImage && tileImage.complete) {
+                // Draw each tile at its absolute position on the canvas
+                ctx.drawImage(tileImage, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            } else {
+                let color = 'pink';
+                if (tileType === 0) color = 'lightgray';
+                else if (tileType === 1) color = 'darkgray';
+                else if (tileType === 2) color = 'gold';
+                ctx.fillStyle = color;
+                ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
 }
 
+// **** NEW: drawPlayer() - DRAWS AT PLAYER'S ABSOLUTE POSITION ****
 function drawPlayer() {
-    const playerDrawX = (canvas.width / 2) - (PLAYER_SIZE / 2);
-    const playerDrawY = (canvas.height / 2) - (PLAYER_SIZE / 2);
+    // Player is drawn at their actual map coordinates on the canvas
+    const playerDrawX = player.x * TILE_SIZE + (TILE_SIZE - PLAYER_SIZE) / 2;
+    const playerDrawY = player.y * TILE_SIZE + (TILE_SIZE - PLAYER_SIZE) / 2;
 
-    // This is the actual player being drawn in the center of the screen
     if (images.player && images.player.complete) {
         ctx.drawImage(images.player, playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
     } else {
-        ctx.fillStyle = 'red'; // Fallback to red square if player image not loaded
+        ctx.fillStyle = 'red';
         ctx.fillRect(playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
     }
-
-    // Debug: Draw a distinct shape for the player if there's still confusion (optional)
-    // ctx.fillStyle = 'lime'; // A very bright, unmistakable color
-    // ctx.beginPath();
-    // ctx.arc(playerDrawX + PLAYER_SIZE / 2, playerDrawY + PLAYER_SIZE / 2, PLAYER_SIZE / 2, 0, Math.PI * 2);
-    // ctx.fill();
-    // ctx.closePath();
-    // ctx.strokeStyle = 'black';
-    // ctx.lineWidth = 2;
-    // ctx.stroke();
 }
 
 function drawGame() {
@@ -287,11 +251,7 @@ function loadGame() {
 // --- Event Listeners ---
 
 document.addEventListener('keydown', (e) => {
-    // console.log("Key pressed:", e.key); // Removed for cleaner console
-    if (!gameStarted) {
-        // console.log("Game not started yet, ignoring key press."); // Removed for cleaner console
-        return;
-    }
+    if (!gameStarted) return;
 
     let newX = player.x;
     let newY = player.y;
@@ -314,23 +274,17 @@ document.addEventListener('keydown', (e) => {
             e.preventDefault();
             break;
         default:
-            // console.log("Non-arrow key pressed, ignoring."); // Removed for cleaner console
             return;
     }
-
-    // console.log("Attempting to move from (" + player.x + "," + player.y + ") to (" + newX + "," + newY + ")"); // Removed for cleaner console
 
     if (!isColliding(newX, newY)) {
         player.x = newX;
         player.y = newY;
         updateMessage('Moving...');
-        // console.log("Player successfully moved to (" + player.x + "," + player.y + ")."); // Removed for cleaner console
         drawGame();
-        // console.log("drawGame() called after move."); // Removed for cleaner console
         checkInteraction();
     } else {
         updateMessage("Can't go that way! It's a wall.");
-        // console.log("Collision detected. Player did NOT move."); // Removed for cleaner console
     }
 });
 
