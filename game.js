@@ -13,10 +13,10 @@ const resetButton = document.getElementById('resetButton');
 const TILE_SIZE = 32; // Size of each tile in pixels
 const PLAYER_SIZE = TILE_SIZE - 4; // Player slightly smaller than tile
 
-// --- Camera Dead Zone Constants ---
-// Player can move within this many pixels from the edge of the screen before camera moves
-const DEADZONE_X_PX = canvas.width / 4; // Example: Player moves within the central 50% horizontally
-const DEADZONE_Y_PX = canvas.height / 4; // Example: Player moves within the central 50% vertically
+// --- Message Timer Constants & Variable ---
+const IDLE_MESSAGE_DELAY = 3000; // Time in milliseconds before reverting to idle message (e.g., 3 seconds)
+const IDLE_MESSAGE = "Explore the map to find your tasks!"; // The message when player is idle
+let messageTimerId = null; // Variable to hold the timer ID, so we can cancel it
 
 // --- Image Assets Variables ---
 const images = {}; // Object to hold all our loaded images
@@ -25,8 +25,8 @@ const totalImages = 4; // Expecting all 4 images to be uploaded and loading corr
 
 // --- Game state Variables ---
 const player = {
-    x: 2, // Player's current x position on the MAP grid (grid coordinates)
-    y: 2, // Player's current y position on the MAP grid (grid coordinates)
+    x: 2, // Player's starting X position
+    y: 2, // Player's starting Y position
 };
 
 // Camera state: stores the top-left pixel coordinates of the currently visible map area
@@ -46,13 +46,13 @@ const gameMap = [
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Task 2
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -122,11 +122,11 @@ function loadImage(name, src) {
     img.onerror = () => {
         console.error(`Failed to load image: ${src}. Please ensure the file exists and the path is correct (case-sensitive!).`);
     };
-    img.src = src + '?v=' + new Date().getTime();
+    img.src = src + '?v=' + new Date().getTime(); // Cache busting
     images[name] = img;
 }
 
-// **** NEW: updateCamera() for Dead Zone Camera ****
+// Update camera position based on player's position and dead zone
 function updateCamera() {
     // Convert player's tile position to pixel position on the overall map
     const playerMapPxX = player.x * TILE_SIZE + (TILE_SIZE / 2); // Center of player tile
@@ -162,7 +162,7 @@ function updateCamera() {
 }
 
 
-// **** UPDATED: drawMap() - Uses camera offsets ****
+// drawMap() - Uses camera offsets
 function drawMap() {
     // Only draw tiles that are currently visible on the screen
     const startTileX = Math.floor(camera.x / TILE_SIZE);
@@ -185,7 +185,6 @@ function drawMap() {
                 }
 
                 if (tileImage && tileImage.complete) {
-                    // Draw each tile relative to the camera's position
                     ctx.drawImage(tileImage,
                                   x * TILE_SIZE - camera.x,
                                   y * TILE_SIZE - camera.y,
@@ -203,7 +202,7 @@ function drawMap() {
     }
 }
 
-// **** UPDATED: drawPlayer() - Draws relative to camera position ****
+// drawPlayer() - Draws relative to camera position
 function drawPlayer() {
     // Player is drawn at their absolute map position, offset by the camera
     const playerDrawX = player.x * TILE_SIZE - camera.x + (TILE_SIZE - PLAYER_SIZE) / 2;
@@ -217,7 +216,7 @@ function drawPlayer() {
     }
 }
 
-// Main game drawing loop (now includes updateCamera)
+// Main game drawing loop (includes updateCamera)
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateCamera(); // Update camera position before drawing
@@ -225,24 +224,31 @@ function drawGame() {
     drawPlayer();
 }
 
-// isColliding function (should be correct now)
+// isColliding function (with added debugging logs removed for cleaner console)
 function isColliding(targetX, targetY) {
-    // console.log(`isColliding check for target: (${targetX}, ${targetY})`); // Removed for cleaner console
-
     if (targetX < 0 || targetX >= gameMap[0].length ||
         targetY < 0 || targetY >= gameMap.length) {
-        // console.log("isColliding: Target is outside map boundaries."); // Removed for cleaner console
         return true;
     }
     const tileValue = gameMap[targetY][targetX];
-    // console.log(`isColliding: Tile at (${targetX}, ${targetY}) has value ${tileValue}.`); // Removed for cleaner console
     return tileValue === 1;
 }
 
-
+// Message handling
 function updateMessage(message) {
     currentMessage = message;
     gameMessage.textContent = currentMessage;
+
+    if (messageTimerId) {
+        clearTimeout(messageTimerId);
+    }
+    messageTimerId = setTimeout(() => {
+        if (currentMessage === message) {
+            gameMessage.textContent = IDLE_MESSAGE;
+            currentMessage = IDLE_MESSAGE;
+        }
+        messageTimerId = null;
+    }, IDLE_MESSAGE_DELAY);
 }
 
 function updateObjectivesPanel() {
@@ -302,11 +308,10 @@ function loadGame() {
                 correspondingObj.completed = savedObj.completed;
             }
         });
-        updateMessage('Game loaded! Continue your adventure.');
+        updateMessage('Game loaded! Continue your adventure.'); // Message for loaded game
         console.log('Game loaded!');
     } else {
-        // This is the message for a brand new game
-        updateMessage('Welcome, new adventurer! Press arrow keys to move.'); // Updated message
+        updateMessage(IDLE_MESSAGE); // Set idle message for new game
         console.log('No saved game found, starting new.');
     }
     gameStarted = true;
@@ -314,10 +319,10 @@ function loadGame() {
     drawGame();
 }
 
+
 // --- Event Listeners ---
 
 document.addEventListener('keydown', (e) => {
-    // console.log("Key pressed:", e.key); // Removed for cleaner console
     if (!gameStarted) return;
 
     let newX = player.x;
@@ -344,19 +349,14 @@ document.addEventListener('keydown', (e) => {
             return;
     }
 
-    // console.log("Attempting to move from (" + player.x + "," + player.y + ") to (" + newX + "," + newY + ")"); // Removed for cleaner console
-
     if (!isColliding(newX, newY)) {
         player.x = newX;
         player.y = newY;
         updateMessage('Moving...');
-        // console.log("Player successfully moved to (" + player.x + "," + player.y + ")."); // Removed for cleaner console
         drawGame();
-        // console.log("drawGame() called after move."); // Removed for cleaner console
         checkInteraction();
     } else {
-        updateMessage("Can't go that way! It's a wall.");
-        // console.log("Collision detected. Player did NOT move."); // Removed for cleaner console
+        updateMessage("Can't move there!");
     }
 });
 
