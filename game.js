@@ -247,6 +247,13 @@ function loadGame() {
 
 // --- Event Listeners (Must be after functions they call) ---
 
+// --- Event Listeners (Must be after functions they call) ---
+console.log("Attempting to add keydown listener..."); // **** ADD THIS LINE ****
+
+document.addEventListener('keydown', (e) => {
+    // ... (rest of your keydown event listener code)
+});
+
 document.addEventListener('keydown', (e) => {
     console.log("Key pressed:", e.key); // Log every key press
     if (!gameStarted) {
