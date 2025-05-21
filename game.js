@@ -1,3 +1,4 @@
+// --- Core Variables & Initial Setup ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -12,12 +13,12 @@ const resetButton = document.getElementById('resetButton');
 const TILE_SIZE = 32; // Size of each tile in pixels
 const PLAYER_SIZE = TILE_SIZE - 4; // Player slightly smaller than tile
 
-// --- Image Assets ---
+// --- Image Assets Variables ---
 const images = {}; // Object to hold all our loaded images
 let imagesLoadedCount = 0;
 const totalImages = 4; // Expecting all 4 images to be uploaded and loading correctly
 
-// --- Game state ---
+// --- Game state Variables ---
 const player = {
     x: 1, // Player's current x position on the MAP grid (grid coordinates)
     y: 1, // Player's current y position on the MAP grid (grid coordinates)
@@ -75,8 +76,26 @@ let currentMessage = '';
 let gameStarted = false; // To prevent interaction before loading
 
 
-// --- ALL FUNCTION DEFINITIONS (Moved to Top) ---
+// --- ALL FUNCTION DEFINITIONS GO HERE (BEFORE THEY ARE CALLED) ---
 
+// Image loading function
+function loadImage(name, src) {
+    const img = new Image();
+    img.onload = () => {
+        imagesLoadedCount++;
+        if (imagesLoadedCount === totalImages) {
+            console.log('All required images loaded! Calling loadGame().'); // Added log
+            loadGame(); // THIS WILL NOW BE DEFINED
+        }
+    };
+    img.onerror = () => {
+        console.error(`Failed to load image: ${src}. Please ensure the file exists and the path is correct (case-sensitive!).`);
+    };
+    img.src = src;
+    images[name] = img;
+}
+
+// Drawing functions
 function drawMap() {
     let cameraX = player.x * TILE_SIZE - canvas.width / 2 + PLAYER_SIZE / 2;
     let cameraY = player.y * TILE_SIZE - canvas.height / 2 + PLAYER_SIZE / 2;
@@ -143,6 +162,7 @@ function drawGame() {
     drawPlayer();
 }
 
+// Game logic functions
 function isColliding(targetX, targetY) {
     if (targetX < 0 || targetX >= gameMap[0].length ||
         targetY < 0 || targetY >= gameMap.length) {
@@ -225,7 +245,7 @@ function loadGame() {
 }
 
 
-// --- Event Listeners ---
+// --- Event Listeners (Must be after functions they call) ---
 
 document.addEventListener('keydown', (e) => {
     if (!gameStarted) return;
@@ -267,12 +287,12 @@ resetButton.addEventListener('click', () => {
 });
 
 
-// --- Initial calls to start the game ---
+// --- Initial Calls to Start the Game (Must be after everything is defined) ---
 
 // This function call starts the image loading process.
 // Once all images are loaded (via their onload callbacks), loadGame() will be called,
 // which then initiates the first draw of the game.
-loadImage('floor', 'dungeon_floor_tile.png'); // Re-initiate image loading now that functions are defined
+loadImage('floor', 'dungeon_floor_tile.png');
 loadImage('wall', 'fences.png');
 loadImage('player', 'Player.png');
 loadImage('task_icon', 'Chest.png');
