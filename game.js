@@ -305,14 +305,14 @@ function loadGame() {
         updateMessage('Game loaded! Continue your adventure.');
         console.log('Game loaded!');
     } else {
-        updateMessage('Welcome, new adventurer! Begin your onboarding journey.');
+        // This is the message for a brand new game
+        updateMessage('Welcome, new adventurer! Press arrow keys to move.'); // Updated message
         console.log('No saved game found, starting new.');
     }
     gameStarted = true;
     updateObjectivesPanel();
     drawGame();
 }
-
 
 // --- Event Listeners ---
 
