@@ -97,19 +97,11 @@ function loadImage(name, src) {
 
 // Drawing functions
 function drawMap() {
-    let cameraX = player.x * TILE_SIZE - canvas.width / 2 + PLAYER_SIZE / 2;
-    let cameraY = player.y * TILE_SIZE - canvas.height / 2 + PLAYER_SIZE / 2;
+    console.log(`Player pos: (${player.x}, ${player.y})`);
+    // ... camera calculations ...
+    console.log(`Camera pos: (${cameraX.toFixed(2)}, ${cameraY.toFixed(2)})`);
 
-    const maxCameraX = gameMap[0].length * TILE_SIZE - canvas.width;
-    const maxCameraY = gameMap.length * TILE_SIZE - canvas.height;
-
-    cameraX = Math.max(0, Math.min(cameraX, maxCameraX));
-    cameraY = Math.max(0, Math.min(cameraY, maxCameraY));
-
-    const startTileX = Math.floor(cameraX / TILE_SIZE);
-    const endTileX = Math.ceil((cameraX + canvas.width) / TILE_SIZE);
-    const startTileY = Math.floor(cameraY / TILE_SIZE);
-    const endTileY = Math.ceil((cameraY + canvas.height) / TILE_SIZE);
+    // ... startTileX, endTileX, etc. calculations ...
 
     for (let y = startTileY; y < endTileY; y++) {
         for (let x = startTileX; x < endTileX; x++) {
@@ -117,6 +109,7 @@ function drawMap() {
                 const tileType = gameMap[y][x];
                 let tileImage;
 
+                // ... (your existing if/else if for tileType 1, 2, 0) ...
                 if (tileType === 1) {
                     tileImage = images.wall;
                 } else if (tileType === 2) {
@@ -125,12 +118,17 @@ function drawMap() {
                     tileImage = images.floor;
                 }
 
+                if (tileImage === images.player) { // **** ADD THIS CHECK ****
+                    console.warn(`WARNING: Tile at (<span class="math-inline">\{x\},</span>{y}) is drawing the Player image! This tile should be a map tile.`);
+                }
+
                 if (tileImage && tileImage.complete) {
                     ctx.drawImage(tileImage,
                                   x * TILE_SIZE - cameraX,
                                   y * TILE_SIZE - cameraY,
                                   TILE_SIZE, TILE_SIZE);
                 } else {
+                    // Fallback: draw a colored square if image not loaded
                     let color = 'pink';
                     if (tileType === 0) color = 'lightgray';
                     else if (tileType === 1) color = 'darkgray';
@@ -144,17 +142,20 @@ function drawMap() {
 }
 
 function drawPlayer() {
-    const playerDrawX = (canvas.width / 2) - (PLAYER_SIZE / 2);
-    const playerDrawY = (canvas.height / 2) - (PLAYER_SIZE / 2);
+    const playerDrawX = (canvas.width / 2); // Center X of canvas
+    const playerDrawY = (canvas.height / 2); // Center Y of canvas
 
-    if (images.player && images.player.complete) {
-        ctx.drawImage(images.player, playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
-    } else {
-        ctx.fillStyle = 'red';
-        ctx.fillRect(playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
-    }
+    ctx.fillStyle = 'lime'; // A very bright, unmistakable color
+    ctx.beginPath(); // Start drawing a shape
+    ctx.arc(playerDrawX, playerDrawY, PLAYER_SIZE / 2, 0, Math.PI * 2); // Draw a circle
+    ctx.fill(); // Fill the circle with lime
+    ctx.closePath(); // End drawing the shape
+
+    // Optional: Draw a border around the circle for more visibility
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.stroke();
 }
-
 // Main game drawing loop
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
