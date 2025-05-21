@@ -248,7 +248,11 @@ function loadGame() {
 // --- Event Listeners (Must be after functions they call) ---
 
 document.addEventListener('keydown', (e) => {
-    if (!gameStarted) return;
+    console.log("Key pressed:", e.key); // Log every key press
+    if (!gameStarted) {
+        console.log("Game not started yet, ignoring key press.");
+        return;
+    }
 
     let newX = player.x;
     let newY = player.y;
@@ -266,26 +270,26 @@ document.addEventListener('keydown', (e) => {
         case 'ArrowRight':
             newX++;
             break;
+        default: // If other keys are pressed
+            console.log("Non-arrow key pressed, ignoring.");
+            return;
     }
+
+    console.log("Attempting to move from (" + player.x + "," + player.y + ") to (" + newX + "," + newY + ")"); // Log attempted move
 
     if (!isColliding(newX, newY)) {
-        player.x = newX;
-        player.y = newY;
+        player.x = newX; // Update player's data position
+        player.y = newY; // Update player's data position
         updateMessage('Moving...');
-        drawGame(); // Redraw game after player moves
-        checkInteraction(); // Check for interaction at new position
+        console.log("Player successfully moved to (" + player.x + "," + player.y + ")."); // Confirm data update
+        drawGame(); // THIS SHOULD REDRAW THE GAME
+        console.log("drawGame() called after move."); // Confirm drawGame was reached
+        checkInteraction();
     } else {
         updateMessage("Can't go that way! It's a wall.");
+        console.log("Collision detected. Player did NOT move."); // Confirm collision detection
     }
 });
-
-resetButton.addEventListener('click', () => {
-    if (confirm('Are you sure you want to reset all game progress?')) {
-        localStorage.removeItem('onboardingGameSave');
-        location.reload();
-    }
-});
-
 
 // --- Initial Calls to Start the Game (Must be after everything is defined) ---
 
