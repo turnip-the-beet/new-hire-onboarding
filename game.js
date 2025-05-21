@@ -13,6 +13,11 @@ const resetButton = document.getElementById('resetButton');
 const TILE_SIZE = 32; // Size of each tile in pixels
 const PLAYER_SIZE = TILE_SIZE - 4; // Player slightly smaller than tile
 
+// --- Camera Dead Zone Constants (Moved to top with other constants) ---
+// Player can move within this many pixels from the edge of the screen before camera moves
+const DEADZONE_X_PX = canvas.width / 4; // Example: Player moves within the central 50% horizontally
+const DEADZONE_Y_PX = canvas.height / 4; // Example: Player moves within the central 50% vertically
+
 // --- Message Timer Constants & Variable ---
 const IDLE_MESSAGE_DELAY = 3000; // Time in milliseconds before reverting to idle message (e.g., 3 seconds)
 const IDLE_MESSAGE = "Explore the map to find your tasks!"; // The message when player is idle
@@ -211,7 +216,7 @@ function drawPlayer() {
     if (images.player && images.player.complete) {
         ctx.drawImage(images.player, playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
     } else {
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = 'red'; // Fallback to red square if player image not loaded
         ctx.fillRect(playerDrawX, playerDrawY, PLAYER_SIZE, PLAYER_SIZE);
     }
 }
@@ -224,7 +229,7 @@ function drawGame() {
     drawPlayer();
 }
 
-// isColliding function (with added debugging logs removed for cleaner console)
+// isColliding function
 function isColliding(targetX, targetY) {
     if (targetX < 0 || targetX >= gameMap[0].length ||
         targetY < 0 || targetY >= gameMap.length) {
@@ -233,6 +238,7 @@ function isColliding(targetX, targetY) {
     const tileValue = gameMap[targetY][targetX];
     return tileValue === 1;
 }
+
 
 // Message handling
 function updateMessage(message) {
@@ -308,7 +314,7 @@ function loadGame() {
                 correspondingObj.completed = savedObj.completed;
             }
         });
-        updateMessage('Game loaded! Continue your adventure.'); // Message for loaded game
+        updateMessage('Game loaded! Continue your adventure.');
         console.log('Game loaded!');
     } else {
         updateMessage(IDLE_MESSAGE); // Set idle message for new game
