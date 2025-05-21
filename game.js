@@ -122,7 +122,7 @@ function loadImage(name, src) {
     img.onerror = () => {
         console.error(`Failed to load image: ${src}. Please ensure the file exists and the path is correct (case-sensitive!).`);
     };
-    img.src = src;
+    img.src = src + '?v=' + new Date().getTime();
     images[name] = img;
 }
 
